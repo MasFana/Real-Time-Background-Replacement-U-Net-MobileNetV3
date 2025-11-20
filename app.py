@@ -218,7 +218,7 @@ with col_settings:
     nilai_threshold = st.slider("Threshold", 0.1, 0.9, 0.5)
 
     # -------------------------------------------------
-    # PENGATURAN MODE MESIN (DIPERBARUI)
+    # PENGATURAN MODE MESIN 
     # -------------------------------------------------
     with st.expander("Pilih Mesin AI (Performance)", expanded=True):
         opsi_mesin = ["TFLite"]
