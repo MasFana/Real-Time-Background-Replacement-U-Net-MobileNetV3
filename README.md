@@ -60,7 +60,6 @@ Dataset Validasi (Ukuran citra: 256x256):
 1.  **Kecepatan:** Model **TFLite** unggul signifikan dengan capaian **~158 FPS**, menjadikannya satu-satunya pilihan layak untuk aplikasi *real-time*.
 2.  **Ukuran:** Kompresi TFLite mereduksi ukuran model hingga **10x lebih kecil** (11.7 MB $\rightarrow$ 1.08 MB).
 3.  **Akurasi:** Penurunan akurasi akibat kuantisasi sangat kecil (hanya 0.0027 poin pada Dice Coef) dan hampir tidak terlihat secara visual.
-4.  **Catatan GPU:** Pada inferensi *single-image* (batch=1), CPU (via TFLite) lebih cepat daripada GPU karena *overhead* transfer memori (RAM ke VRAM) pada GPU lebih besar daripada waktu komputasinya.
 
 ### Visualisasi Komparasi
 ![Benchmark Comparison](benchmark_viz.png)
