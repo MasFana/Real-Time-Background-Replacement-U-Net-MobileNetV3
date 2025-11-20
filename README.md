@@ -15,7 +15,6 @@ Model segmentasi dibangun menggunakan arsitektur **U-Net** dengan backbone **Mob
 *   **Real-Time Inference:** Mampu mencapai **~158 FPS** menggunakan model TFLite Quantized.
 *   **Custom Background:** Pengguna dapat mengunggah gambar latar belakang sendiri.
 *   **Adjustable Threshold:** Slider untuk mengatur sensitivitas pemisahan background/foreground.
-*   **Privacy First:** Pemrosesan dilakukan secara lokal di browser/perangkat (tergantung konfigurasi).
 *   **Debug Mode:** Visualisasi *Red Overlay* atau *Black & White Mask* untuk analisis model.
 
 ---
