@@ -1,9 +1,0 @@
-Tested on Radeon 6600H 
-
-16-20 FPS TFLite CPU
-5-6 FPS KERAS CPU
-8-10 FPS KERAS GPU
-
-Known bug : 
-On insecure contexts Chrome/Chromium artificially caps every camera stream at 640 × 480 (and often falls back to 360 p) for privacy/security reasons.
-That is exactly what you are seeing: the same machine, the same camera, but the page is opened on http://localhost:8501 → Chrome downgrades the stream → your code receives 360/480 frames and prints that size on the overlay.
