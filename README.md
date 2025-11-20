@@ -53,13 +53,13 @@ Dataset Validasi (Ukuran citra: 256x256):
 
 | Model Mode | Dice Coef (Akurasi) | Dice Loss | Avg Inference Time | FPS | Model Size |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **TFLite (Quantized)** | **0.9002** | **0.0998** | **6.32 ms** | **158.2** | **1.1 MB** |
-| Keras (GPU) | 0.9029 | 0.0971 | 96.16 ms | 10.4 | 12 MB |
-| Keras (CPU) | 0.9029 | 0.0971 | 120.09 ms | 8.3 | 12 MB |
+| **TFLite (Quantized)** | **0.9002** | **0.0998** | **6.32 ms** | **158.2** | **1.08 MB** |
+| Keras (GPU) | 0.9029 | 0.0971 | 96.16 ms | 10.4 | 11.7 MB |
+| Keras (CPU) | 0.9029 | 0.0971 | 120.09 ms | 8.3 | 11.7 MB |
 
 ### Analisis Hasil
 1.  **Kecepatan:** Model **TFLite** unggul signifikan dengan capaian **~158 FPS**, menjadikannya satu-satunya pilihan layak untuk aplikasi *real-time*.
-2.  **Ukuran:** Kompresi TFLite mereduksi ukuran model hingga **10x lebih kecil** (12 MB $\rightarrow$ 1.1 MB).
+2.  **Ukuran:** Kompresi TFLite mereduksi ukuran model hingga **10x lebih kecil** (11.7 MB $\rightarrow$ 1.08 MB).
 3.  **Akurasi:** Penurunan akurasi akibat kuantisasi sangat kecil (hanya 0.0027 poin pada Dice Coef) dan hampir tidak terlihat secara visual.
 4.  **Catatan GPU:** Pada inferensi *single-image* (batch=1), CPU (via TFLite) lebih cepat daripada GPU karena *overhead* transfer memori (RAM ke VRAM) pada GPU lebih besar daripada waktu komputasinya.
 
