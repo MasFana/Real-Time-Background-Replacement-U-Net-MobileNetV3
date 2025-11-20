@@ -1,0 +1,4 @@
+,Dice Coef (Acc),Dice Loss,Inference Time,FPS,Model Size
+Keras_GPU,0.9029,0.0971,96.16 ms,10.4,11.70 MB
+TFLite,0.9002,0.0998,6.32 ms,158.2,1.08 MB
+Keras_CPU,0.9029,0.0971,120.09 ms,8.3,11.70 MB

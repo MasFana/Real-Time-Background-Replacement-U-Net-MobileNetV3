@@ -1,18 +1,22 @@
+# Real-Time Background Replacement (U-Net MobileNetV3)
 
+![Python](https://img.shields.io/badge/Python-3.9%2B-blue)
+![TensorFlow](https://img.shields.io/badge/TensorFlow-2.x-orange)
+![Streamlit](https://img.shields.io/badge/Streamlit-WebRTC-red)
 
-# Real-Time Background Replacement dengan U-Net MobileNetV3
+Proyek ini mengimplementasikan sistem penggantian latar belakang (*Virtual Background*) secara *real-time* untuk video conferencing berbasis web.
 
-Proyek ini mengimplementasikan sistem penggantian latar belakang (background replacement) secara *real-time* untuk video conferencing berbasis web. Model ini dibangun menggunakan arsitektur **U-Net** dengan backbone **MobileNetV3-Large**, yang dirancang untuk efisiensi tinggi pada perangkat dengan sumber daya terbatas (CPU).
+Model segmentasi dibangun menggunakan arsitektur **U-Net** dengan backbone **MobileNetV3-Large**, yang secara khusus dirancang untuk efisiensi tinggi pada perangkat dengan sumber daya komputasi terbatas (seperti Laptop tanpa GPU diskrit atau Edge Devices).
 
-Aplikasi ini dikembangkan menggunakan **TensorFlow/Keras** untuk pelatihan dan **Streamlit + WebRTC** untuk antarmuka pengguna.
+---
 
-## Referensi Paper
+## Fitur Utama
 
-Proyek ini mengacu pada metodologi yang dijelaskan dalam paper berikut, khususnya pada pendekatan *Lightweight U-Net MobileNet*:
-
-> **Kiran Shahi, and Yongmin Li.** (2023). *Background Replacement in Video Conferencing*. International Journal of Network Dynamics and Intelligence.
->
-> *Abstract:* Studi ini membandingkan U-Net standar dengan U-Net berbasis MobileNet untuk segmentasi semantik yang efisien guna memisahkan foreground dan background secara real-time.
+*   **Real-Time Inference:** Mampu mencapai **~158 FPS** menggunakan model TFLite Quantized.
+*   **Custom Background:** Pengguna dapat mengunggah gambar latar belakang sendiri.
+*   **Adjustable Threshold:** Slider untuk mengatur sensitivitas pemisahan background/foreground.
+*   **Privacy First:** Pemrosesan dilakukan secara lokal di browser/perangkat (tergantung konfigurasi).
+*   **Debug Mode:** Visualisasi *Red Overlay* atau *Black & White Mask* untuk analisis model.
 
 ---
 
@@ -21,96 +25,80 @@ Proyek ini mengacu pada metodologi yang dijelaskan dalam paper berikut, khususny
 Berikut adalah tampilan antarmuka aplikasi saat dijalankan di browser:
 
 ![User Interface](image.png)
+*(Tampilan Streamlit dengan fitur upload background dan kontrol threshold)*
 
-*Fitur UI meliputi: upload custom background, slider threshold, dan pilihan mode debug (Overlay Merah / Masker B&W).*
+---
+
+## Referensi Paper
+
+Metodologi proyek ini mengacu pada pendekatan *Lightweight U-Net MobileNet* yang dijelaskan dalam:
+
+> **Kiran Shahi, and Yongmin Li.** (2023). *Background Replacement in Video Conferencing*. International Journal of Network Dynamics and Intelligence.
+>
+> *Abstract:* Studi ini membandingkan U-Net standar dengan U-Net berbasis MobileNet untuk segmentasi semantik yang efisien guna memisahkan foreground dan background secara real-time.
 
 ---
 
 ## Performa & Benchmark
 
-Aplikasi telah diuji pada perangkat keras **Radeon 6600H**. Berikut adalah rata-rata FPS yang didapatkan berdasarkan mesin inferensi yang digunakan:
+Pengujian dilakukan untuk membandingkan efisiensi antara model **Keras (.h5)** standar dengan model **TFLite (.tflite)** yang telah dikuantisasi.
 
-| Inference Engine | Rata-rata FPS | Keterangan |
-| :--- | :---: | :--- |
-| **TFLite (Quantized)** | **16 - 20 FPS** | ✅ **Rekomendasi** (CPU Optimized) |
-| Keras (GPU) | 8 - 10 FPS | Menggunakan TensorFlow Direct |
-| Keras (CPU) | 5 - 6 FPS | Paling lambat (Fallback) |
+### Spesifikasi Perangkat
+*   **CPU:** AMD Ryzen 5 6600H
+*   **RAM:** 16 GB
+*   **OS:** Ubuntu 22
 
-> **Catatan:** Model TFLite menggunakan kuantisasi default dan berjalan multi-threaded pada CPU, membuatnya jauh lebih cepat dibandingkan inferensi GPU standar untuk ukuran batch tunggal (1 frame).
+### Hasil Benchmark
+Dataset Validasi (Ukuran citra: 256x256):
 
----
+| Model Mode | Dice Coef (Akurasi) | Dice Loss | Avg Inference Time | FPS | Model Size |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **TFLite (Quantized)** | **0.9002** | **0.0998** | **6.32 ms** | **158.2** | **1.1 MB** |
+| Keras (GPU) | 0.9029 | 0.0971 | 96.16 ms | 10.4 | 12 MB |
+| Keras (CPU) | 0.9029 | 0.0971 | 120.09 ms | 8.3 | 12 MB |
 
-## Arsitektur & Cara Kerja
+### Analisis Hasil
+1.  **Kecepatan:** Model **TFLite** unggul signifikan dengan capaian **~158 FPS**, menjadikannya satu-satunya pilihan layak untuk aplikasi *real-time*.
+2.  **Ukuran:** Kompresi TFLite mereduksi ukuran model hingga **10x lebih kecil** (12 MB $\rightarrow$ 1.1 MB).
+3.  **Akurasi:** Penurunan akurasi akibat kuantisasi sangat kecil (hanya 0.0027 poin pada Dice Coef) dan hampir tidak terlihat secara visual.
+4.  **Catatan GPU:** Pada inferensi *single-image* (batch=1), CPU (via TFLite) lebih cepat daripada GPU karena *overhead* transfer memori (RAM ke VRAM) pada GPU lebih besar daripada waktu komputasinya.
 
-Sistem ini menggunakan arsitektur **Encoder-Decoder** (U-Net).
-1.  **Encoder (Backbone):** Menggunakan **MobileNetV3-Large** (pre-trained ImageNet) untuk mengekstrak fitur gambar secara progresif. Layer spesifik diambil untuk *skip connections*.
-2.  **Decoder:** Menggunakan blok **Residual Decoder** kustom untuk merekonstruksi masker segmentasi dari fitur yang diekstrak, menggabungkan informasi spasial dari encoder (via skip connection) untuk detail tepian yang lebih baik.
-
-### Diagram Arsitektur
-
-![Model](model.png)
-
----
-
-## Proses Training (`PCD_Akhir.ipynb`)
-
-File notebook digunakan untuk melatih model dari awal hingga konversi ke TFLite.
-
-1.  **Dataset:** Menggunakan dataset **Kaggle Person Segmentation** (nikhilroxtomar).
-2.  **Preprocessing & Augmentasi:**
-    *   Library: `Albumentations`.
-    *   Teknik: *Coarse Dropout* (simulasi oklusi), *Channel Shuffle*, Rotasi, dan Flip. Ini penting agar model tahan terhadap gangguan visual.
-3.  **Loss Function:** Hybrid Loss (**Binary Cross Entropy + Dice Loss**).
-    *   *BCE:* Menjaga stabilitas klasifikasi pixel per pixel.
-    *   *Dice:* Memaksimalkan overlap area masker (IOU).
-4.  **Optimisasi Model:**
-    *   Model disimpan dalam format `.keras`.
-    *   Dikonversi ke `.tflite` dengan **Default Optimization (Quantization)** untuk mereduksi ukuran model (4x lebih kecil) dan mempercepat inferensi CPU.
+### Visualisasi Komparasi
+![Benchmark Comparison](benchmark_viz.png)
 
 ---
 
-## Penjelasan Program Aplikasi (`app.py`)
+## Arsitektur Model
 
-Aplikasi utama dibangun menggunakan **Streamlit**.
+Sistem menggunakan arsitektur **Encoder-Decoder** (U-Net):
 
-1.  **Inisialisasi:**
-    *   Mengecek ketersediaan GPU dan library `ai-edge-litert` atau `tensorflow-lite`.
-    *   Memuat model ke dalam cache (`@st.cache_resource`) agar tidak dimuat ulang setiap frame.
-2.  **Video Processing (`PenggantiBackground` Class):**
-    *   Menerima frame dari webcam via WebRTC.
-    *   **Resize:** Mengubah ukuran frame ke 256x256 pixel (input model).
-    *   **Inferensi:**
-        *   Jika **TFLite**: Menggunakan `Interpreter` dengan *multi-threading*.
-        *   Jika **Keras**: Menggunakan `model.predict` standar.
-    *   **Post-Processing:** Resize output mask kembali ke ukuran asli webcam, melakukan thresholding, dan menggabungkan (compositing) dengan background baru.
-3.  **WebRTC:** Menangani streaming video agar tetap berjalan lancar di browser tanpa mengirim gambar ke server backend (pemrosesan lokal/klien jika memungkinkan, atau server-side processing yang efisien).
+1.  **Encoder (Backbone):** **MobileNetV3-Large** (pre-trained ImageNet). Bertugas mengekstrak fitur gambar. Layer spesifik diambil untuk *skip connections*.
+2.  **Decoder:** Blok **Residual Decoder** kustom. Bertugas merekonstruksi masker segmentasi dengan menggabungkan informasi spasial dari encoder untuk detail tepian (rambut, jari, dll) yang lebih baik.
+
+![Model Architecture](model.png)
 
 ---
 
-## Known Issues (Bug)
+## Alur Pengembangan
 
-**Resolusi Kamera di Browser (Chrome/Chromium)**
-Pada konteks yang tidak aman (HTTP, bukan HTTPS), Chrome secara paksa membatasi stream kamera.
-> *On insecure contexts Chrome/Chromium artificially caps every camera stream at 640 × 480 (and often falls back to 360p) for privacy/security reasons.*
->
-> Jika Anda menjalankan di `http://localhost:8501`, Anda mungkin melihat kualitas video turun atau terpotong. Solusinya adalah menjalankan aplikasi pada konteks HTTPS atau mengabaikan penurunan resolusi ini saat development.
+Detail proses training dapat dilihat pada notebook `PCD_Akhir.ipynb`.
+
+1.  **Dataset:** Kaggle Person Segmentation (nikhilroxtomar).
+2.  **Preprocessing:** Resize ke 256x256, normalisasi.
+3.  **Augmentasi (Albumentations):**
+    *   *Coarse Dropout:* Simulasi oklusi/gangguan objek.
+    *   *Channel Shuffle, Rotation, Flip:* Meningkatkan generalisasi model.
+4.  **Loss Function:** Hybrid (**Binary Cross Entropy + Dice Loss**).
+5.  **Optimisasi:** Konversi model Keras ke TFLite dengan **Default Quantization** untuk CPU inference yang cepat.
 
 ---
 
 ## Cara Menjalankan
 
 ### 1. Persiapan Environment
+Pastikan Python 3.9 - 3.11 terinstall. Disarankan menggunakan Virtual Environment.
 
-Disarankan menggunakan Python 3.9 - 3.11.
-
-**A. Requirement untuk Training (Jupyter Notebook)**
-Install library berikut jika ingin melatih ulang model:
-```bash
-pip install tensorflow opencv-python matplotlib albumentations scikit-learn
-```
-
-**B. Requirement untuk Menjalankan Aplikasi (App)**
-Buat file `requirements.txt` dengan isi:
+Buat file `requirements.txt`:
 ```text
 streamlit
 streamlit-webrtc
@@ -118,34 +106,41 @@ opencv-python-headless
 tensorflow
 ai-edge-litert
 numpy
+pandas
+matplotlib
+scikit-learn
 Pillow
 av
 ```
-Lalu install:
+
+Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-*(Opsional: Jika ingin performa TFLite maksimal tanpa install full TensorFlow, gunakan `tflite-runtime` atau `ai-edge-litert`)*.
-
 ### 2. Menjalankan Aplikasi
-Pastikan file `best_model_fixed.keras` dan `model_quantized.tflite` berada dalam satu folder dengan `app.py`.
+Pastikan file model (`model_quantized.tflite`) berada di folder yang sama dengan `app.py`.
 
-Jalankan perintah:
 ```bash
 streamlit run app.py
 ```
 
-Akses aplikasi melalui browser di alamat yang muncul di terminal (biasanya `http://localhost:8501`).
+### 3. Struktur Folder
+```text
+.
+├── PCD_Akhir.ipynb              # Notebook training & evaluasi
+├── app.py                       # Aplikasi utama (Streamlit)
+├── benchmark_script.py          # Script benchmarking
+├── best_model_fixed.keras       # Model Full Precision (Backup)
+├── model_quantized.tflite       # Model Optimized (Digunakan App)
+├── benchmark_results.csv        # Log hasil benchmark
+└── dataset/                     # Folder dataset
+```
 
 ---
 
-### Struktur Folder
-```text
-|-- PCD_Akhir.ipynb         # Notebook pelatihan & konversi model
-|-- app.py                  # Aplikasi utama Streamlit
-|-- best_model_fixed.keras  # Model hasil training (Full Precision)
-|-- model_quantized.tflite  # Model hasil optimasi (Untuk App)
-|-- image.png               # Screenshot UI
-`-- __pycache__
-```
+## Known Issues
+
+**Resolusi Kamera di Browser (Chrome/Chromium)**
+Jika aplikasi dijalankan pada konteks yang tidak aman (`http://` biasa), Chrome membatasi resolusi kamera maksimal 640x480 atau lebih rendah demi keamanan privasi.
+> *Solusi:* Abaikan saat development di localhost, atau deploy menggunakan HTTPS untuk resolusi penuh.
