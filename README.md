@@ -116,6 +116,7 @@ streamlit
 streamlit-webrtc
 opencv-python-headless
 tensorflow
+ai-edge-litert
 numpy
 Pillow
 av
