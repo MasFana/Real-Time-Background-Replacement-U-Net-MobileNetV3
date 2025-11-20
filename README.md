@@ -8,6 +8,8 @@ Proyek ini mengimplementasikan sistem penggantian latar belakang (*Virtual Backg
 
 Model segmentasi dibangun menggunakan arsitektur **U-Net** dengan backbone **MobileNetV3-Large**, yang secara khusus dirancang untuk efisiensi tinggi pada perangkat dengan sumber daya komputasi terbatas (seperti Laptop tanpa GPU diskrit atau Edge Devices).
 
+**Demo : https://fanaunet.streamlit.app/**
+
 ---
 
 ## Fitur Utama
