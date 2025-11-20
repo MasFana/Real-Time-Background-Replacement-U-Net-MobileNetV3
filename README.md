@@ -40,7 +40,7 @@ Metodologi proyek ini mengacu pada pendekatan *Lightweight U-Net MobileNet* yang
 
 ## Performa & Benchmark
 
-Pengujian dilakukan untuk membandingkan efisiensi antara model **Keras (.h5)** standar dengan model **TFLite (.tflite)** yang telah dikuantisasi.
+Pengujian dilakukan untuk membandingkan efisiensi antara model **Keras (.keras)** standar dengan model **TFLite (.tflite)** yang telah dikuantisasi.
 
 ### Spesifikasi Perangkat
 *   **CPU:** AMD Ryzen 5 6600H
