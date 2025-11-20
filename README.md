@@ -26,7 +26,7 @@ Berikut adalah tampilan antarmuka aplikasi saat dijalankan di browser:
 
 ---
 
-## ⚡ Performa & Benchmark
+## Performa & Benchmark
 
 Aplikasi telah diuji pada perangkat keras **Radeon 6600H**. Berikut adalah rata-rata FPS yang didapatkan berdasarkan mesin inferensi yang digunakan:
 
@@ -139,7 +139,7 @@ Akses aplikasi melalui browser di alamat yang muncul di terminal (biasanya `http
 
 ---
 
-### 📂 Struktur Folder
+### Struktur Folder
 ```text
 |-- PCD_Akhir.ipynb         # Notebook pelatihan & konversi model
 |-- app.py                  # Aplikasi utama Streamlit
