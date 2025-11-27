@@ -1,0 +1,9 @@
+,Config,Dice Acc,Avg Latency,Est. FPS,Blur Type,CLAHE
+5. Gaussian Blur,5. Gaussian Blur,0.9020,42.4 ms,23.6,Gaussian,Off
+1. Raw (No Filter),1. Raw (No Filter),0.9002,13.1 ms,76.4,None,Off
+6. Gaussian + CLAHE,6. Gaussian + CLAHE,0.8997,28.8 ms,34.7,Gaussian,On
+2. CLAHE Only,2. CLAHE Only,0.8994,19.9 ms,50.2,None,On
+7. Bilateral (Heavy),7. Bilateral (Heavy),0.8994,20.0 ms,50.0,Bilateral,Off
+3. Median Blur,3. Median Blur,0.8992,9.7 ms,103.1,Median,Off
+4. Median + CLAHE,4. Median + CLAHE,0.8971,14.1 ms,70.7,Median,On
+8. Bilateral + CLAHE,8. Bilateral + CLAHE,0.8959,30.9 ms,32.3,Bilateral,On
