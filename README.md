@@ -120,20 +120,23 @@ Eksperimen dilakukan untuk mengukur dampak berbagai filter preprocessing terhada
 
 ### Hasil Benchmark Filter
 
-| Konfigurasi | Dice Accuracy | Est. FPS | Catatan |
-| :--- | :---: | :---: | :--- |
-| **Raw (No Filter)** | **0.9002** | **~158** | Baseline, tercepat |
-| CLAHE Only | 0.8985 | ~145 | Sedikit overhead |
-| Median Blur | 0.8978 | ~142 | Noise reduction ringan |
-| Gaussian Blur | 0.8965 | ~148 | Blur cepat |
-| Bilateral | 0.8920 | ~85 | Edge-preserving tapi lambat |
-| Bilateral + CLAHE | 0.8905 | ~78 | Paling lambat |
+| Konfigurasi | Dice Accuracy | Est. FPS | Blur Type | CLAHE |
+| :--- | :---: | :---: | :---: | :---: |
+| **Bilateral (Heavy)** | **0.9052** | 72.2 | Bilateral | Off |
+| CLAHE Only | 0.9035 | 96.6 | None | On |
+| Bilateral + CLAHE | 0.9031 | 62.5 | Bilateral | On |
+| Median Blur | 0.9022 | 114.1 | Median | Off |
+| Median + CLAHE | 0.8997 | 90.5 | Median | On |
+| Raw (No Filter) | 0.8983 | **155.4** | None | Off |
 
 ### Kesimpulan Filter
-1.  **Raw input tanpa filter** memberikan hasil **terbaik** baik dari segi akurasi maupun kecepatan.
-2.  Filter blur (Median/Gaussian/Bilateral) **tidak meningkatkan** akurasi segmentasi karena model sudah dilatih dengan augmentasi yang cukup.
-3.  **CLAHE** memberikan peningkatan kontras tetapi tidak signifikan untuk use-case ini.
-4.  **Bilateral Filter** sangat lambat (~50% FPS drop) dan tidak direkomendasikan untuk real-time.
+1.  **Bilateral Filter** memberikan akurasi **tertinggi** (0.9052) namun dengan trade-off kecepatan (~72 FPS).
+2.  **Raw input tanpa filter** adalah pilihan **tercepat** (~155 FPS) dan cocok untuk aplikasi real-time dengan akurasi yang masih baik (0.8983).
+3.  **CLAHE** meningkatkan akurasi (+0.5%) dengan overhead kecepatan yang moderat (~96 FPS).
+4.  **Trade-off Akurasi vs Kecepatan:**
+    - Prioritas **Akurasi** → Gunakan *Bilateral Filter* 
+    - Prioritas **Real-time** → Gunakan *Raw (No Filter)*
+    - **Balanced** → Gunakan *CLAHE Only* atau *Median Blur*
 
 ### Visualisasi Perbandingan Filter
 
