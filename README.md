@@ -79,9 +79,72 @@ Sistem menggunakan arsitektur **Encoder-Decoder** (U-Net):
 
 ---
 
+## Data Augmentation Pipeline
+
+Untuk meningkatkan generalisasi model, digunakan pipeline augmentasi berbasis **Albumentations** dengan teknik berikut:
+
+| Augmentasi | Parameter | Probabilitas | Tujuan |
+| :--- | :--- | :---: | :--- |
+| **Resize** | 256×256 | 100% | Standarisasi ukuran input |
+| **HorizontalFlip** | - | 50% | Invariansi terhadap orientasi horizontal |
+| **Rotate** | limit=±45° | 50% | Robustness terhadap rotasi kepala/badan |
+| **ChannelShuffle** | - | 20% | Invariansi terhadap variasi warna |
+| **ToGray** | - | 10% | Robustness terhadap input grayscale |
+| **CoarseDropout** | 1-8 holes, 1-32px | 20% | Simulasi oklusi/gangguan objek |
+
+### Visualisasi Augmentasi
+
+Berikut contoh hasil augmentasi pada data training:
+
+![Data Augmentation](full_augmentation_viz.png)
+*(Kolom 1-2: Original Image & Mask | Kolom 3-4: Augmented Image & Mask)*
+
+---
+
+## Preprocessing Filter Benchmark
+
+Eksperimen dilakukan untuk mengukur dampak berbagai filter preprocessing terhadap akurasi dan kecepatan inference menggunakan model TFLite.
+
+### Skenario Filter yang Diuji
+
+| # | Konfigurasi | Blur Type | CLAHE |
+| :---: | :--- | :--- | :---: |
+| 1 | Raw (No Filter) | None | Off |
+| 2 | CLAHE Only | None | On |
+| 3 | Median Blur | Median (k=5) | Off |
+| 4 | Median + CLAHE | Median (k=5) | On |
+| 5 | Gaussian Blur | Gaussian (5×5) | Off |
+| 6 | Gaussian + CLAHE | Gaussian (5×5) | On |
+| 7 | Bilateral (Heavy) | Bilateral (d=9, σ=75) | Off |
+| 8 | Bilateral + CLAHE | Bilateral (d=9, σ=75) | On |
+
+### Hasil Benchmark Filter
+
+| Konfigurasi | Dice Accuracy | Est. FPS | Catatan |
+| :--- | :---: | :---: | :--- |
+| **Raw (No Filter)** | **0.9002** | **~158** | Baseline, tercepat |
+| CLAHE Only | 0.8985 | ~145 | Sedikit overhead |
+| Median Blur | 0.8978 | ~142 | Noise reduction ringan |
+| Gaussian Blur | 0.8965 | ~148 | Blur cepat |
+| Bilateral | 0.8920 | ~85 | Edge-preserving tapi lambat |
+| Bilateral + CLAHE | 0.8905 | ~78 | Paling lambat |
+
+### Kesimpulan Filter
+1.  **Raw input tanpa filter** memberikan hasil **terbaik** baik dari segi akurasi maupun kecepatan.
+2.  Filter blur (Median/Gaussian/Bilateral) **tidak meningkatkan** akurasi segmentasi karena model sudah dilatih dengan augmentasi yang cukup.
+3.  **CLAHE** memberikan peningkatan kontras tetapi tidak signifikan untuk use-case ini.
+4.  **Bilateral Filter** sangat lambat (~50% FPS drop) dan tidak direkomendasikan untuk real-time.
+
+### Visualisasi Perbandingan Filter
+
+![Filter Benchmark](benchmark_filter_viz.png)
+*(Perbandingan output segmentasi dengan berbagai konfigurasi filter)*
+
+---
+
 ## Alur Pengembangan
 
-Detail proses training dapat dilihat pada notebook `PCD_Akhir.ipynb`.
+Detail proses training dapat dilihat pada notebook `PCD_Akhir.ipynb` dan evaluasi di `Metrics.ipynb`.
 
 1.  **Dataset:** Kaggle Person Segmentation (nikhilroxtomar).
 2.  **Preprocessing:** Resize ke 256x256, normalisasi.
@@ -90,6 +153,7 @@ Detail proses training dapat dilihat pada notebook `PCD_Akhir.ipynb`.
     *   *Channel Shuffle, Rotation, Flip:* Meningkatkan generalisasi model.
 4.  **Loss Function:** Hybrid (**Binary Cross Entropy + Dice Loss**).
 5.  **Optimisasi:** Konversi model Keras ke TFLite dengan **Default Quantization** untuk CPU inference yang cepat.
+6.  **Evaluasi:** Benchmark performa dengan berbagai preprocessing filter.
 
 ---
 
